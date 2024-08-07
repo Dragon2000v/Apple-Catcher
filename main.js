@@ -16,6 +16,7 @@ class GameScene extends Phaser.Scene {
     this.playerSpeed = speedDown + 50;
     this.target;
     this.points = 0;
+    this.textScore;
   }
 
   preload() {
@@ -26,12 +27,23 @@ class GameScene extends Phaser.Scene {
 
   create() {
     this.add.image(0, 0, 'bg').setOrigin(0, 0);
+
     this.player = this.physics.add
       .image(0, size.height - 100, 'basket')
       .setOrigin(0, 0);
     this.player.setImmovable(true);
     this.player.body.allowGravity = false;
     this.player.setCollideWorldBounds(true);
+    // this.player.setSize(80, 15).setOffset(10, 70);
+    this.player
+      .setSize(
+        this.player.width - this.player.width / 4,
+        this.player.height / 6
+      )
+      .setOffset(
+        this.player.width / 10,
+        this.player.height - this.player.height / 10
+      );
 
     this.target = this.physics.add.image(0, 0, 'apple').setOrigin(0, 0);
     this.target.setMaxVelocity(0, speedDown);
@@ -45,6 +57,11 @@ class GameScene extends Phaser.Scene {
     );
 
     this.cursor = this.input.keyboard.createCursorKeys();
+
+    this.textScore = this.add.text(size.width - 120, 10, 'Score:0', {
+      font: '25px Arial',
+      fill: '#000000',
+    });
   }
 
   update() {
@@ -72,6 +89,7 @@ class GameScene extends Phaser.Scene {
     this.target.setY(0);
     this.target.setX(this.getRandomX());
     this.points++;
+    this.textScore.setText(`Score: ${this.points}`);
   }
 }
 
