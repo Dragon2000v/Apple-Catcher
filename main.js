@@ -6,7 +6,13 @@ const size = {
   height: 500,
 };
 
-const speedDown = 150;
+const speedDown = 300;
+
+const gameStartDiv = document.querySelector('#gameStartDiv');
+const gameStartBtn = document.querySelector('#gameStartBtn');
+const gameEndDiv = document.querySelector('#gameEndDiv');
+const gameWinLoseSpan = document.querySelector('#gameWinLoseSpan');
+const gameEndScoreSpan = document.querySelector('#gameEndScoreSpan');
 
 class GameScene extends Phaser.Scene {
   constructor() {
@@ -36,11 +42,13 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.coinMusic = this.sound.add('coin');
-    this.bgMusic = this.sound.add('bgMusic');
+    this.scene.pause('scene-game');
+
+    this.coinMusic = this.sound.add('coin', { volume: 0.1 });
+    this.bgMusic = this.sound.add('bgMusic', { volume: 0.01 });
     // this.bgMusic.volume()
     this.bgMusic.play();
-    this.bgMusic.stop();
+    // this.bgMusic.stop();
 
     this.add.image(0, 0, 'bg').setOrigin(0, 0);
 
@@ -138,7 +146,16 @@ class GameScene extends Phaser.Scene {
   }
 
   gameOver() {
-    console.log('Game Over');
+    this.sys.game.destroy(true);
+    if (this.points >= 10) {
+      gameEndScoreSpan.textContent = this.points;
+      gameWinLoseSpan.textContent = 'Win !!!';
+    } else {
+      gameEndScoreSpan.textContent = this.points;
+      gameWinLoseSpan.textContent = 'Lose !!!';
+    }
+
+    gameEndDiv.style.display = 'flex';
   }
 }
 
@@ -151,10 +168,15 @@ const config = {
     default: 'arcade',
     arcade: {
       gravity: { y: speedDown },
-      debug: true,
+      debug: false,
     },
   },
   scene: [GameScene],
 };
 
 const game = new Phaser.Game(config);
+
+gameStartBtn.addEventListener('click', () => {
+  gameStartDiv.style.display = 'none';
+  game.scene.resume('scene-game');
+});
