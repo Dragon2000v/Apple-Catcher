@@ -13,6 +13,8 @@ const gameStartBtn = document.querySelector('#gameStartBtn');
 const gameEndDiv = document.querySelector('#gameEndDiv');
 const gameWinLoseSpan = document.querySelector('#gameWinLoseSpan');
 const gameEndScoreSpan = document.querySelector('#gameEndScoreSpan');
+const targetScoreInput = document.querySelector('#targetScoreInput');
+const timeLimitInput = document.querySelector('#timeLimitInput');
 
 class GameScene extends Phaser.Scene {
   constructor() {
@@ -29,6 +31,9 @@ class GameScene extends Phaser.Scene {
     this.coinMusic;
     this.bgMusic;
     this.emitter;
+    this.fallSpeed = speedDown;
+    this.targetScore = 10;
+    this.timeLimit = 30;
   }
 
   preload() {
@@ -46,9 +51,7 @@ class GameScene extends Phaser.Scene {
 
     this.coinMusic = this.sound.add('coin', { volume: 0.1 });
     this.bgMusic = this.sound.add('bgMusic', { volume: 0.01 });
-    // this.bgMusic.volume()
     this.bgMusic.play();
-    // this.bgMusic.stop();
 
     this.add.image(0, 0, 'bg').setOrigin(0, 0);
 
@@ -58,7 +61,6 @@ class GameScene extends Phaser.Scene {
     this.player.setImmovable(true);
     this.player.body.allowGravity = false;
     this.player.setCollideWorldBounds(true);
-    // this.player.setSize(80, 15).setOffset(10, 70);
     this.player
       .setSize(
         this.player.width - this.player.width / 4,
@@ -70,7 +72,7 @@ class GameScene extends Phaser.Scene {
       );
 
     this.target = this.physics.add.image(0, 0, 'apple').setOrigin(0, 0);
-    this.target.setMaxVelocity(0, speedDown);
+    this.target.setMaxVelocity(0, this.fallSpeed);
 
     this.physics.add.overlap(
       this.target,
@@ -82,17 +84,27 @@ class GameScene extends Phaser.Scene {
 
     this.cursor = this.input.keyboard.createCursorKeys();
 
-    this.textScore = this.add.text(size.width - 120, 10, 'Score:0', {
+    this.textScore = this.add.text(
+      size.width - 170,
+      10,
+      `Score: 0 / ${this.targetScore}`,
+      {
+        font: '25px Arial',
+        fill: '#000000',
+      }
+    );
+
+    this.textTime = this.add.text(10, 10, `Remaining Time: ${this.timeLimit}`, {
       font: '25px Arial',
       fill: '#000000',
     });
 
-    this.textTime = this.add.text(10, 10, 'Remaining Time: 00', {
-      font: '25px Arial',
-      fill: '#000000',
-    });
-
-    this.timedEvent = this.time.delayedCall(30000, this.gameOver, [], this);
+    this.timedEvent = this.time.delayedCall(
+      this.timeLimit * 1000,
+      this.gameOver,
+      [],
+      this
+    );
 
     this.emitter = this.add.particles(0, 0, 'money', {
       speed: 100,
@@ -119,6 +131,11 @@ class GameScene extends Phaser.Scene {
     if (this.target.y >= size.height) {
       this.target.setY(0);
       this.target.setX(this.getRandomX());
+
+      if (this.points > 0) {
+        this.points--;
+      }
+      this.textScore.setText(`Score: ${this.points} / ${this.targetScore}`);
     }
 
     const { left, right } = this.cursor;
@@ -130,6 +147,8 @@ class GameScene extends Phaser.Scene {
     } else {
       this.player.setVelocityX(0);
     }
+
+    this.target.setVelocityY(this.fallSpeed);
   }
 
   getRandomX() {
@@ -142,12 +161,20 @@ class GameScene extends Phaser.Scene {
     this.target.setY(0);
     this.target.setX(this.getRandomX());
     this.points++;
-    this.textScore.setText(`Score: ${this.points}`);
+    this.textScore.setText(`Score: ${this.points} / ${this.targetScore}`);
+
+    this.fallSpeed += 50;
+
+    if (this.points >= this.targetScore) {
+      this.gameOver();
+    }
   }
 
   gameOver() {
+    this.bgMusic.stop();
     this.sys.game.destroy(true);
-    if (this.points >= 10) {
+
+    if (this.points >= this.targetScore) {
       gameEndScoreSpan.textContent = this.points;
       gameWinLoseSpan.textContent = 'Win !!!';
     } else {
@@ -163,7 +190,7 @@ const config = {
   type: Phaser.WEBGL,
   width: size.width,
   height: size.height,
-  canvas: gameCanvas,
+  canvas: document.querySelector('#gameCanvas'),
   physics: {
     default: 'arcade',
     arcade: {
@@ -177,6 +204,12 @@ const config = {
 const game = new Phaser.Game(config);
 
 gameStartBtn.addEventListener('click', () => {
+  const targetScore = parseInt(targetScoreInput.value, 10);
+  const timeLimit = parseInt(timeLimitInput.value, 10);
+
+  game.scene.scenes[0].targetScore = targetScore;
+  game.scene.scenes[0].timeLimit = timeLimit;
+
   gameStartDiv.style.display = 'none';
   game.scene.resume('scene-game');
 });

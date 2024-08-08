@@ -14,17 +14,17 @@
       <canvas id="gameCanvas"></canvas>
       <div id="gameStartDiv" class="gameUI">
         <h1>Apple Catcher</h1>
-        <p>You have 30 seconds to catch apples!</p>
-        <p>If you catch more then 10 apples you win</p>
-        <p>If you catch less then 10 apples you lose</p>
-        <p>Click the start button to begin</p>
-        <button id="gameStartBtn">start</button>
+        <p>Select your target score:</p>
+        <input id="targetScoreInput" type="number" min="1" value="10" />
+        <p>Select your time limit (seconds):</p>
+        <input id="timeLimitInput" type="number" min="1" value="30" />
+        <button id="gameStartBtn">Start</button>
       </div>
       <div id="gameEndDiv" class="gameUI">
         <p>Game Over</p>
         <h1>You <span id="gameWinLoseSpan"></span></h1>
         <h1>You <span id="gameEndScoreSpan"></span></h1>
-        <p>Refresh the Page to paly again</p>
+        <p>Refresh the Page to play again</p>
       </div>
     </main>
     <footer>
